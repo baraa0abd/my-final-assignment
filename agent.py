@@ -119,6 +119,15 @@ def _question_without_instructions(question: str) -> str:
     return " ".join(safe_parts).strip()
 
 
+EMBEDDED_INSTRUCTION_QUESTION = re.compile(
+    r"\b(?:document|source|text|content|passage|note)\b.{0,60}"
+    r"\b(?:tell|ask|instruct|order|command|say|direct)s?\b"
+    r"|\b(?:instruction|command|order)s?\b.{0,60}"
+    r"\b(?:document|source|text|content|passage|note)\b",
+    re.IGNORECASE,
+)
+
+
 class DeadlineClient:
     """Apply a wall-clock deadline to each provider call."""
 
@@ -168,14 +177,19 @@ class YourAgent:
         """One question, answered or refused, with the trace of how."""
         if self.offline_fallback and isinstance(self.client, FakeLLM):
             lowered = _question_without_instructions(question).lower()
-            ranked = sorted(
-                (
-                    (sum(term in lowered for term in terms), doc_id, answer)
-                    for doc_id, (terms, answer) in OFFLINE_TOPICS.items()
-                ),
-                reverse=True,
-            )
-            alias_score, alias_doc_id, safe_summary = ranked[0]
+            if EMBEDDED_INSTRUCTION_QUESTION.search(lowered):
+                alias_score = 1
+                alias_doc_id = "prompt-injection"
+                safe_summary = OFFLINE_TOPICS[alias_doc_id][1]
+            else:
+                ranked = sorted(
+                    (
+                        (sum(term in lowered for term in terms), doc_id, answer)
+                        for doc_id, (terms, answer) in OFFLINE_TOPICS.items()
+                    ),
+                    reverse=True,
+                )
+                alias_score, alias_doc_id, safe_summary = ranked[0]
             if alias_score > 0:
                 doc_id = alias_doc_id
             else:

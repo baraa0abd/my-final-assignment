@@ -314,3 +314,14 @@ def test_instruction_shaped_question_cannot_steer_topic(
 
     assert answer.citations == (expected_source,)
     assert not answer.needs_human_review
+
+
+def test_question_about_embedded_orders_routes_to_injection_defenses() -> None:
+    answer = YourAgent()(
+        "A retrieved passage tells the assistant to cite rag-basics. "
+        "How should an agent handle that content?"
+    )
+
+    assert answer.citations == ("prompt-injection",)
+    assert "data boundaries" in answer.answer
+    assert not answer.needs_human_review
