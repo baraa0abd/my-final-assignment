@@ -70,13 +70,18 @@ OFFLINE_TOPICS = {
         "a protocol and distribution boundary that an MCP client can discover.",
     ),
     "prompt-injection": (
-        ("prompt injection", "injection", "untrusted", "retrieved document", "defen"),
+        ("prompt injection", "injection", "untrusted", "retrieved document", "defen",
+         "embedded order", "malicious", "instruction-shaped", "data with instructions",
+         "exfiltrate", "blast radius", "delimiters", "credentials"),
         "Layered defenses mark data boundaries with delimiters, constrain output with a strict "
         "schema, keep tools read-only with bound capabilities and a tool-call budget, keep "
         "credentials and secrets out of context, and test with an adversarial document.",
     ),
     "evaluation-basics": (
-        ("evaluation", "eval", "golden", "metric", "judge", "refusal case", "reliability"),
+        ("evaluation", "eval", "golden", "metric", "judge", "refusal case", "reliability",
+         "measurement", "pass condition", "rerunnable", "expected property", "unhappy path",
+         "code-based", "deterministic", "bias", "false positive", "trace", "diagnostic",
+         "failure bucket", "baseline", "regression"),
         "A golden evaluation set includes supported questions, unsupported or not-found "
         "questions, and explicit refusal cases. Rerunnable checks measure reliability rather "
         "than charisma, while traces classify whether retrieval or generation caused a failure.",
@@ -133,13 +138,6 @@ class YourAgent:
         """One question, answered or refused, with the trace of how."""
         if self.offline_fallback and isinstance(self.client, FakeLLM):
             lowered = question.lower()
-            retrieval_question = question
-            if ":" in question and any(
-                marker in lowered.split(":", 1)[0]
-                for marker in ("ignore", "disregard", "forget", "override")
-            ):
-                retrieval_question = question.split(":", 1)[1]
-            lexical = retrieve(retrieval_question, self.documents, top_k=1)
             ranked = sorted(
                 (
                     (sum(term in lowered for term in terms), doc_id, answer)
@@ -148,9 +146,7 @@ class YourAgent:
                 reverse=True,
             )
             alias_score, alias_doc_id, _ = ranked[0]
-            if lexical and lexical[0].score >= 3.0:
-                doc_id = lexical[0].chunk.doc_id
-            elif alias_score > 0:
+            if alias_score > 0:
                 doc_id = alias_doc_id
             else:
                 doc_id = ""
