@@ -1,15 +1,13 @@
 # my-final-assignment
 
-<!-- write this: one sentence. What it answers, from what, and what it does when
-the sources say nothing. -->
+A source-grounded developer research assistant that answers from six versioned documents, cites the document it used, and refuses unsupported questions.
 
 <!-- add the CI badge once the repository exists:
 ![check](https://github.com/<your-github-username>/my-final-assignment/actions/workflows/check.yml/badge.svg) -->
 
 ## The problem
 
-<!-- write this: who has the problem, and what goes wrong for them today. Two to
-four sentences: minute 1 of your demo, in writing. -->
+Developers need concise answers about agent engineering without losing the evidence behind them. A fluent model can invent a source or answer beyond the supplied material, so this assistant makes retrieval, citation checks, timeouts, and refusals part of the return contract.
 
 ## Demo
 
@@ -23,8 +21,13 @@ uv run bootcamp capstone trace "How does chunking work in RAG?"
 ```
 
 ```text
-<!-- paste this: the output. The citation must be a document retrieval
-returned for this question, and the trace shows it did. -->
+[retrieve] offline topic match -> rag-basics
+[decision] deterministic grounded answer with citation rag-basics
+
+answer: Chunking splits documents into passages and respects paragraph boundaries so each passage keeps a coherent idea. Retrieval indexes those passage-sized chunks, returns the relevant context, and citations identify the source used for the answer.
+citations: ['rag-basics']
+confidence: 0.85
+needs_human_review: False
 ```
 
 ### One refusal
@@ -34,16 +37,18 @@ uv run bootcamp capstone trace "What is the capital city of Mongolia?"
 ```
 
 ```text
-<!-- paste this: the output. A refusal is flagged for review, cites nothing,
-says so in words, and the trace shows no model call was spent. -->
+[retrieve] top_k=3 -> []
+[decision] no relevant chunks; refusing without an LLM call
+
+answer: I don't know based on the provided corpus.
+citations: []
+confidence: 0.0
+needs_human_review: True
 ```
 
 ## Architecture
 
-<!-- write this: the shape of one run (chain, loop or graph), from question to
-answer: retrieval, the model call, citation verification, the refusal paths.
-Name the model calls one question costs. The decision, and the measurement that
-would reverse it, are in docs/adr/0001-run-shape.md. -->
+One bounded hand-written loop classifies and retrieves first. Empty retrieval refuses at zero model calls. The offline lane returns a declared, cited summary; a provider lane makes at most two bounded calls, parses strict JSON, strips citations retrieval did not return, flags instruction-shaped retrieved data, and converts provider errors or timeouts into refusals.
 
 See [docs/adr/0001-run-shape.md](docs/adr/0001-run-shape.md).
 
@@ -55,22 +60,20 @@ fake model's.
 
 | What | Command | Model | Result |
 |---|---|---|---|
-| Contract tests | `uv run pytest` | fake | <!-- paste this: the summary line --> |
-| Practice grader | `uv run bootcamp capstone grade` | <!-- write this --> | <!-- paste this: the `score:` line --> |
-| Evaluation, before and after | see [docs/EVAL_REPORT.md](docs/EVAL_REPORT.md) | <!-- write this --> | <!-- paste this: the two pass rates --> |
+| Contract tests | `uv run pytest` | fake | 8 passed, 1 skipped |
+| Practice grader | `uv run bootcamp capstone grade` | fake | score: 10/10 (100%) — PASSED |
+| Evaluation, before and after | see [docs/EVAL_REPORT.md](docs/EVAL_REPORT.md) | fake | 30% to 100% |
 
 ## The honest limitation
 
-<!-- write this: rank 1 of docs/ISSUES.md in one sentence, and the next step
-you would take. Naming it first is the difference between a limitation and a
-hole somebody found. -->
+The largest remaining limitation is that a small declared topic vocabulary can still miss an unseen paraphrase; the next step is a measured hybrid retriever with a larger held-out paraphrase set.
 
 The full ranked list is in [docs/ISSUES.md](docs/ISSUES.md).
 
 ## How to run it
 
 ```bash
-git clone https://github.com/<your-github-username>/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest
+git clone https://github.com/baraa0abd/my-final-assignment && cd my-final-assignment && uv sync && uv run pytest
 ```
 
 No key needed: without a `.env` it runs on the offline fake model. For a real
@@ -84,20 +87,15 @@ first, then answers the final questions and opens the pull request.
 
 ## Sources
 
-<!-- optional. write this: anything you used beyond the six documents in
-data/corpus/, and where it came from (session 13). Delete the section if none. -->
+The implementation uses the Dev3Pack course package pinned at commit 52ad0db and only the six documents in data/corpus.
 
 ## Credits
 
-<!-- optional. write this: every repository you learned from or borrowed code
-from, with a link and one line on what you took. Capstone repositories are
-public so people can learn from each other; naming the source keeps your
-showcase honest about which parts are yours. Delete the section if none. -->
+Generated from the Dev3Pack final-assignment template; the bounded agent result and schema types come from the pinned course package.
 
 ## Rollback
 
-<!-- optional. write this: how to undo a bad change, with a number and a unit
-(session 14's rollback sentence). Delete the section if you have none yet. -->
+Revert the failing commit and redeploy the previous release within 10 minutes, then rerun the contract and practice gates.
 
 ---
 

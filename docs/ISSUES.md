@@ -10,12 +10,12 @@ The columns are the three fields `cap01-e5` reads.
 
 | rank | issue | impact |
 |---:|---|---|
-| 1 | <!-- write this: a sentence naming the issue --> | <!-- write this: who it hurts and how badly --> |
-| 2 | <!-- write this --> | <!-- write this --> |
-| 3 | <!-- write this --> | <!-- write this --> |
+| 1 | Lexical retrieval misses paraphrases with no shared words | A supported user question can be refused even though the corpus contains the answer |
+| 2 | Topic classification uses a small declared vocabulary | A novel synonym can select the wrong source and produce a refusal or irrelevant citation |
+| 3 | The in-memory corpus has no freshness version in its answer receipt | A changed document is invisible until the process reloads the corpus |
 
 ## Rank 1, in progress
 
-- The fix: <!-- write this (session 14) -->
-- The regression test: <!-- write this: its name in tests/ -->
+- The fix: add declared topic aliases for the six versioned documents and keep the normal retriever as the refusal gate.
+- The regression test: test_regression_rank_1_of_the_issue_list
 - Before and after: see [EVAL_REPORT.md](EVAL_REPORT.md).

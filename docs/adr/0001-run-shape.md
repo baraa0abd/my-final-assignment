@@ -4,30 +4,26 @@
 loop or graph, and the model calls each one cost). The four fields are the
 ones `ch10-e2` reads.
 
-- Status: <!-- write this: proposed | accepted | superseded by ADR NNNN -->
-- Date: <!-- write this -->
+- Status: accepted
+- Date: 2026-10-04
 
 ## Context
 
-<!-- write this: what forced a choice, and the model-call count you measured
-for each shape in session 8. -->
+The agent needs visible refusal paths and a strict budget. The measured chain and tool loop each used 1 model call for a supported question; one reflection revision used 3 calls.
 
 ## Decision (`decision`)
 
-<!-- write this: one sentence phrased as a choice ("we keep the chain in
-agent.py"), not as a description of the code. -->
+We keep the hand-written bounded loop and deterministic offline lane in agent.py.
 
 ## Options considered (`options_considered`)
 
-1. <!-- write this: the option you took -->
-2. <!-- write this: the option you turned down -->
+1. The hand-written bounded loop around the course retrieval pipeline
+2. A graph framework with declared nodes and edges
 
 ## Why not the other option (`why_not`)
 
-<!-- write this: the reason it lost, today. The reason, not the verdict. -->
+The current workflow has few transitions, and a graph framework would add a dependency without improving the measured contract score.
 
 ## What would reverse it (`reverses_it`)
 
-<!-- write this: a measurement with a number and a unit, e.g. "when a question
-needs more than 2 model calls in 10 of the golden cases". "When it gets slow" is
-an opinion, not a trigger. -->
+Adopt a graph when the workflow exceeds 8 declared transitions or p95 debugging time exceeds 30 minutes across 10 incidents.

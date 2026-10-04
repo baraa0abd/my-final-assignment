@@ -3,16 +3,16 @@
 **Filled by:** session 11. The five lines are the ones `ch11-e2` reads, in the
 same words; answer each one after its colon.
 
-STORED: <!-- write this: exactly what a session keeps, e.g. preferences and the last N episodes -->
+STORED: no user profile; one request and its trace exist only for the duration of a call.
 
-WHY: <!-- write this: what each stored thing is used for -->
+WHY: request-local state supports retrieval, citation verification, and an inspectable trace.
 
-CORRECTED BY: <!-- write this: how a user fixes or clears what was stored -->
+CORRECTED BY: the caller sends a corrected question; no persistent record needs editing.
 
-EXPIRES: <!-- write this: when it is deleted, with a number and a unit, and the cap -->
+EXPIRES: request-local state expires when the call returns, with a cap of 3 tool calls.
 
-WE REFUSE TO REMEMBER: <!-- write this: what is never stored, whatever the user types (keys, personal data, ...) -->
+WE REFUSE TO REMEMBER: secrets, credentials, payment data, health data, or cross-user personal history.
 
 ## How the code enforces it
 
-<!-- write this: the test in tests/ that proves the cap and the reset. -->
+tests/test_contract.py verifies bounded tools and zero-call refusals. The agent intentionally has no persistent user-memory API, so reset and cross-user leakage are impossible in this version.

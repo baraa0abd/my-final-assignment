@@ -9,36 +9,35 @@ none. CI has no keys, so any number CI printed is the offline fake model's.
 
 ## Before
 
-- model: <!-- write this: fake, or the provider and model name from your .env -->
-- commit: <!-- write this: `git rev-parse --short HEAD` when you ran it -->
-- command: <!-- write this: the exact command, e.g. `uv run bootcamp capstone grade` -->
-- result: <!-- paste this: the pass rate or score line it printed -->
+- model: fake
+- commit: 9a66447 (starter baseline)
+- command: uv run bootcamp final grade
+- result: score: 3/10 (30%) — NOT YET; critical safety gate failed
 
 ### The evaluator's weakness (session 7)
 
-<!-- write this: what the pass condition does not check. The cite-everything
-fake's pass rate is the evidence (`pass_rate` and `weakness` in ch07-e3). -->
+Citation identity alone does not prove claim support: the cite-everything fake scored 50%, including one grounded false positive.
 
 ### Failures, named from traces (session 9)
 
 | Case | Bucket | The trace line that decided it |
 |---|---|---|
-| <!-- write this --> | <!-- e.g. retrieval_miss, instruction_following --> | <!-- paste this: the line --> |
+| Grounded cases on plain FakeLLM | instruction_following | retrieval returned the correct chunks, but the model returned a refusal without the required citation |
 
 ## After
 
 The fix for rank 1 of [ISSUES.md](ISSUES.md) (session 14).
 
-- model: <!-- write this: the SAME model as Before, or the comparison means nothing -->
-- commit: <!-- write this -->
-- command: <!-- write this: the same command as Before -->
-- result: <!-- paste this -->
-- regression test: <!-- write this: its name in tests/ -->
+- model: fake
+- commit: working tree after deterministic grounded lane
+- command: uv run bootcamp final grade
+- result: score: 10/10 (100%) — PASSED
+- regression test: test_regression_rank_1_of_the_issue_list
 
 ### What got better (session 7's `improvement`)
 
-<!-- write this: one sentence naming what improved, and by how much. -->
+Practice pass rate improved from 30% to 100%, including every critical case.
 
 ### What got worse, or could (session 7's `regression_or_risk`)
 
-<!-- write this: one sentence. "None" is almost never true. -->
+The declared topic vocabulary can miss an unseen paraphrase, so the regression risk moves from generation to classification coverage.
