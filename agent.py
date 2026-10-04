@@ -37,7 +37,9 @@ from bootcamp_agent.tools import Tool, build_tools
 CORPUS_DIR = Path(__file__).resolve().parent / "data" / "corpus"
 
 INSTRUCTION_SHAPE = re.compile(
-    r"\bignore\s+(?:all\s+|any\s+|the\s+)?(?:previous|prior|earlier)\s+instructions?\b"
+    r"\bignore\s+(?:all\s+|any\s+|the\s+|your\s+)?"
+    r"(?:previous|prior|earlier|system|developer)?\s*(?:instructions?|rules?)\b"
+    r"|\bdisregard\s+(?:all\s+|any\s+|the\s+|your\s+)?(?:instructions?|rules?)\b"
     r"|\b(?:system|assistant)\s*:\s*"
     r"|\b(?:always|first|instead)\s+(?:call|reply|answer|cite)\b",
     re.IGNORECASE,
@@ -89,6 +91,25 @@ OFFLINE_TOPICS = {
 }
 
 
+def _question_without_instructions(question: str) -> str:
+    """Remove instruction-shaped clauses before deterministic topic routing."""
+    safe_parts: list[str] = []
+    for part in re.split(r"(?<=[.!?;])\s+|[\r\n]+", question):
+        attack = INSTRUCTION_SHAPE.search(part)
+        if attack is None:
+            safe_parts.append(part)
+        elif attack.start() > 0:
+            safe_parts.append(part[: attack.start()])
+        else:
+            # Some attacks prefix a legitimate question in the same sentence,
+            # e.g. "Ignore your rules ...: what defenses ...?". Keep only the
+            # explicit interrogative tail; discard imperative topic steering.
+            tail = re.search(r"\b(?:what|how|why|which|when|where|who)\b.*", part, re.I)
+            if tail is not None:
+                safe_parts.append(tail.group())
+    return " ".join(safe_parts).strip()
+
+
 class DeadlineClient:
     """Apply a wall-clock deadline to each provider call."""
 
@@ -137,7 +158,7 @@ class YourAgent:
     def run(self, question: str) -> AgentResult:
         """One question, answered or refused, with the trace of how."""
         if self.offline_fallback and isinstance(self.client, FakeLLM):
-            lowered = question.lower()
+            lowered = _question_without_instructions(question).lower()
             ranked = sorted(
                 (
                     (sum(term in lowered for term in terms), doc_id, answer)
