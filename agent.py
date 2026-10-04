@@ -48,8 +48,11 @@ INSTRUCTION_SHAPE = re.compile(
     r"|\b(?:answer|reply|respond|cite)\s+(?:only|with|about|the)\b"
     r"|\b(?:citation|citations)\s*(?:must|should|=|:|to\s+be|is|are|include)\b"
     r"|\b(?:return|output|emit|produce)\b.{0,30}\b(?:answer|citation|json)\b"
+    r"|\b(?:use|choose|set|list|name)\b.{0,30}\b(?:source|citation)\b"
     r"|\bfollow\b.{0,40}\b(?:instruction|direction|order)\b"
     r"|\b(?:do|say|write)\s+(?:exactly|only)\b"
+    r"|\b(?:rag-basics|structured-outputs|agent-loops|mcp-overview|"
+    r"prompt-injection|evaluation-basics)\b"
     r"|\b(?:pretend|role-?play|act\s+as)\b",
     re.IGNORECASE,
 )
