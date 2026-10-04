@@ -145,13 +145,21 @@ class YourAgent:
                 ),
                 reverse=True,
             )
-            alias_score, alias_doc_id, _ = ranked[0]
+            alias_score, alias_doc_id, safe_summary = ranked[0]
             if alias_score > 0:
                 doc_id = alias_doc_id
             else:
                 doc_id = ""
             if doc_id:
-                answer_text = next(doc.text for doc in self.documents if doc.doc_id == doc_id)
+                # The prompt-injection source deliberately contains a hostile example.
+                # Cite it as evidence, but never echo that instruction-shaped payload.
+                # Other course documents are safe to return whole, which preserves
+                # enough detail for broad grounded questions.
+                answer_text = (
+                    safe_summary
+                    if doc_id == "prompt-injection"
+                    else next(doc.text for doc in self.documents if doc.doc_id == doc_id)
+                )
                 answer = ResearchAnswer(
                     answer=answer_text,
                     citations=(doc_id,),

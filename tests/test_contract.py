@@ -281,3 +281,12 @@ def test_regression_rank_1_of_the_issue_list() -> None:
     assert answer.citations == ("rag-basics",)
     assert "passages" in answer.answer
     assert not answer.needs_human_review
+
+
+def test_offline_injection_answer_does_not_echo_hostile_example() -> None:
+    answer = YourAgent()("How do I defend against prompt injection?")
+
+    assert answer.citations == ("prompt-injection",)
+    assert "strict schema" in answer.answer
+    assert "ignore previous instructions" not in answer.answer.lower()
+    assert not answer.needs_human_review
