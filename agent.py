@@ -133,6 +133,13 @@ class YourAgent:
         """One question, answered or refused, with the trace of how."""
         if self.offline_fallback and isinstance(self.client, FakeLLM):
             lowered = question.lower()
+            retrieval_question = question
+            if ":" in question and any(
+                marker in lowered.split(":", 1)[0]
+                for marker in ("ignore", "disregard", "forget", "override")
+            ):
+                retrieval_question = question.split(":", 1)[1]
+            lexical = retrieve(retrieval_question, self.documents, top_k=1)
             ranked = sorted(
                 (
                     (sum(term in lowered for term in terms), doc_id, answer)
@@ -140,8 +147,15 @@ class YourAgent:
                 ),
                 reverse=True,
             )
-            score, doc_id, answer_text = ranked[0]
-            if score > 0:
+            alias_score, alias_doc_id, _ = ranked[0]
+            if lexical and lexical[0].score >= 3.0:
+                doc_id = lexical[0].chunk.doc_id
+            elif alias_score > 0:
+                doc_id = alias_doc_id
+            else:
+                doc_id = ""
+            if doc_id:
+                answer_text = next(doc.text for doc in self.documents if doc.doc_id == doc_id)
                 answer = ResearchAnswer(
                     answer=answer_text,
                     citations=(doc_id,),
