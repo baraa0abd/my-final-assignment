@@ -87,9 +87,17 @@ OFFLINE_TOPICS = {
         ("prompt injection", "injection", "untrusted", "retrieved document", "defen",
          "embedded order", "malicious", "instruction-shaped", "data with instructions",
          "exfiltrate", "blast radius", "delimiters", "credentials"),
-        "Layered defenses mark data boundaries with delimiters, constrain output with a strict "
-        "schema, keep tools read-only with bound capabilities and a tool-call budget, keep "
-        "credentials and secrets out of context, and test with an adversarial document.",
+        "Prompt injection is the confusion of untrusted data with instructions. It can enter "
+        "through retrieved documents, web pages, tool results, API specifications, repository "
+        "comments, commit messages, and README files. Layered defenses mark data boundaries "
+        "around retrieved content with delimiters and treat it as data rather than commands; "
+        "constrain output with a "
+        "strict schema and validation; bound capabilities with read-only tools and a tool-call "
+        "budget to limit blast radius; keep credentials and secrets outside model context; and "
+        "include an adversarial document in the evaluation set to prove the agent quotes rather "
+        "than obeys embedded instructions. Every ingested document, specification, and tool "
+        "response must be treated as untrusted input, and system actions must stay safe even "
+        "when hostile text changes the wording of an answer.",
     ),
     "evaluation-basics": (
         ("evaluation", "eval", "golden", "metric", "judge", "refusal case", "reliability",
