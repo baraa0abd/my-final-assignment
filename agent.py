@@ -130,6 +130,12 @@ EMBEDDED_INSTRUCTION_QUESTION = re.compile(
     re.IGNORECASE,
 )
 
+INJECTION_TOPIC_SIGNAL = re.compile(
+    r"\b(?:prompt injection|injection attack|untrusted|malicious|hostile|adversarial|"
+    r"instruction-shaped|exfiltrat\w*|credentials?|secrets?)\b",
+    re.IGNORECASE,
+)
+
 
 class DeadlineClient:
     """Apply a wall-clock deadline to each provider call."""
@@ -180,7 +186,10 @@ class YourAgent:
         """One question, answered or refused, with the trace of how."""
         if self.offline_fallback and isinstance(self.client, FakeLLM):
             lowered = _question_without_instructions(question).lower()
-            if EMBEDDED_INSTRUCTION_QUESTION.search(lowered):
+            if (
+                EMBEDDED_INSTRUCTION_QUESTION.search(lowered)
+                or INJECTION_TOPIC_SIGNAL.search(lowered)
+            ):
                 alias_score = 1
                 alias_doc_id = "prompt-injection"
                 safe_summary = OFFLINE_TOPICS[alias_doc_id][1]
