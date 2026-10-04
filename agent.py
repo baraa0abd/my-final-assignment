@@ -39,9 +39,14 @@ CORPUS_DIR = Path(__file__).resolve().parent / "data" / "corpus"
 INSTRUCTION_SHAPE = re.compile(
     r"\bignore\s+(?:all\s+|any\s+|the\s+|your\s+)?"
     r"(?:previous|prior|earlier|system|developer)?\s*(?:instructions?|rules?)\b"
-    r"|\bdisregard\s+(?:all\s+|any\s+|the\s+|your\s+)?(?:instructions?|rules?)\b"
+    r"|\b(?:disregard|forget|override|bypass)\b.{0,50}\b(?:instructions?|rules?|prompt)\b"
+    r"|\b(?:new|updated|replacement|hidden)\s+(?:instructions?|rules?|system prompt)\b"
     r"|\b(?:system|assistant)\s*:\s*"
-    r"|\b(?:always|first|instead)\s+(?:call|reply|answer|cite)\b",
+    r"|\b(?:always|first|instead)\s+(?:call|reply|answer|cite)\b"
+    r"|\b(?:you\s+(?:must|should|are\s+to)|please)\s+"
+    r"(?:answer|reply|respond|cite|use|follow|reveal)\b"
+    r"|\b(?:answer|reply|respond|cite)\s+(?:only|with|about|the)\b"
+    r"|\b(?:pretend|role-?play|act\s+as)\b",
     re.IGNORECASE,
 )
 
