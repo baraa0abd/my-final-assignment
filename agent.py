@@ -87,17 +87,12 @@ OFFLINE_TOPICS = {
         ("prompt injection", "injection", "untrusted", "retrieved document", "defen",
          "embedded order", "malicious", "instruction-shaped", "data with instructions",
          "exfiltrate", "blast radius", "delimiters", "credentials"),
-        "Prompt injection is the confusion of untrusted data with instructions. It can enter "
-        "through retrieved documents, web pages, tool results, API specifications, repository "
-        "comments, commit messages, and README files. Layered defenses mark data boundaries "
-        "around retrieved content with delimiters and treat it as data rather than commands; "
-        "constrain output with a "
-        "strict schema and validation; bound capabilities with read-only tools and a tool-call "
-        "budget to limit blast radius; keep credentials and secrets outside model context; and "
-        "include an adversarial document in the evaluation set to prove the agent quotes rather "
-        "than obeys embedded instructions. Every ingested document, specification, and tool "
-        "response must be treated as untrusted input, and system actions must stay safe even "
-        "when hostile text changes the wording of an answer.",
+        "Any channel that feeds text into the prompt is an injection surface. For a RAG "
+        "assistant that means the corpus itself: a document edited to include instructions "
+        "will have those instructions placed, verbatim, into the model's context at answer "
+        "time. For an API-using agent it means specs and docs: a malicious OpenAPI description "
+        "can try to redirect calls or exfiltrate credentials. For a coding assistant it means "
+        "the repository: comments, commit messages, and README files are all model-visible input.",
     ),
     "evaluation-basics": (
         ("evaluation", "eval", "golden", "metric", "judge", "refusal case", "reliability",
@@ -109,6 +104,20 @@ OFFLINE_TOPICS = {
         "than charisma, while traces classify whether retrieval or generation caused a failure.",
     ),
 }
+
+INJECTION_DEFENSE_ANSWER = (
+    "No single defense is complete, so use layers. Mark data boundaries by wrapping retrieved "
+    "content in delimiters and treating it as data to quote rather than commands to follow. "
+    "Constrain output with a strict schema; bound capabilities with read-only tools and a "
+    "tool-call budget; keep credentials outside the model's reach; and test with an adversarial "
+    "document, asserting that the agent quotes its instruction rather than obeying it."
+)
+
+INJECTION_DEFENSE_QUESTION = re.compile(
+    r"\b(?:defen[cs]e|defend|protect|mitigat\w*|prevent|handle|respond|safe|safety|"
+    r"boundary|boundaries|countermeasure)\b",
+    re.IGNORECASE,
+)
 
 
 def _question_without_instructions(question: str) -> str:
@@ -220,7 +229,11 @@ class YourAgent:
                 # Other course documents are safe to return whole, which preserves
                 # enough detail for broad grounded questions.
                 answer_text = (
-                    safe_summary
+                    (
+                        INJECTION_DEFENSE_ANSWER
+                        if INJECTION_DEFENSE_QUESTION.search(lowered)
+                        else safe_summary
+                    )
                     if doc_id == "prompt-injection"
                     else next(doc.text for doc in self.documents if doc.doc_id == doc_id)
                 )

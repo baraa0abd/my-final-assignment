@@ -292,6 +292,15 @@ def test_offline_injection_answer_does_not_echo_hostile_example() -> None:
     assert not answer.needs_human_review
 
 
+def test_offline_injection_surface_question_stays_narrow_and_grounded() -> None:
+    answer = YourAgent()("Where can prompt injection enter a RAG assistant?")
+
+    assert answer.citations == ("prompt-injection",)
+    assert "corpus itself" in answer.answer
+    assert "strict schema" not in answer.answer
+    assert not answer.needs_human_review
+
+
 @pytest.mark.parametrize(
     ("question", "expected_source"),
     [
