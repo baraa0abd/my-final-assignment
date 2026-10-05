@@ -106,15 +106,20 @@ OFFLINE_TOPICS = {
 }
 
 INJECTION_DEFENSE_ANSWER = (
-    "No single defense is complete, so use layers. Mark data boundaries by wrapping retrieved "
-    "content in delimiters and treating it as data to quote rather than commands to follow. "
-    "Constrain output with a strict schema; bound capabilities with read-only tools and a "
-    "tool-call budget; keep credentials outside the model's reach; and test with an adversarial "
-    "document, asserting that the agent quotes its instruction rather than obeying it."
+    "Prompt injection is the confusion of untrusted data with instructions. It can enter "
+    "through retrieved documents, web pages, tool results, API specifications, repository "
+    "comments, commit messages, and README files. Layered defenses mark data boundaries "
+    "around retrieved content with delimiters and treat it as data rather than commands; "
+    "constrain output with a strict schema and validation; bound capabilities with read-only "
+    "tools and a tool-call budget to limit blast radius; keep credentials and secrets outside "
+    "model context; and include an adversarial document in the evaluation set to prove the "
+    "agent quotes rather than obeys embedded instructions. Every ingested document, "
+    "specification, and tool response must be treated as untrusted input, and system actions "
+    "must stay safe even when hostile text changes the wording of an answer."
 )
 
 INJECTION_DEFENSE_QUESTION = re.compile(
-    r"\b(?:defen[cs]e|defend|protect|mitigat\w*|prevent|handle|respond|safe|safety|"
+    r"\b(?:defen[cs]\w*|defend|protect|mitigat\w*|prevent|handle|respond|safe|safety|"
     r"boundary|boundaries|countermeasure)\b",
     re.IGNORECASE,
 )
